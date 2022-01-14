@@ -6,6 +6,7 @@ Do your own work
 ![alt tag](https://github.com/Ramyadesineedi/Data-Management/blob/main/HW2/HW2-Starter-ERD.jpeg)
 
 Coding Standards
+
 •    Naming: Use the final ERD as a reference on how to name tables and columns. For constraints, make the names clear and easy to understand. Avoid abbreviations.
 
 •    Data Types / Lengths:
@@ -25,6 +26,7 @@ o    If you want to add additional comments to single statements or lines feel f
  
 
 Constraints
+
 •    Assign primary and foreign keys per the design.
 •    Only the following can be NULL: Address_line_2 since it’s not required. Customers’ birthdates since it’s not always known. The reservation Checkout Date, Discount Code, Customer Rating, and Notes are also not required since they are allowed to be blank when the reservation is created.  Note, if you see other fields that could be nullable, please clarify these assumptions on Slack. 
 •    The following fields should be UNIQUE: Customer email, Feature Name, Location Name, Reservation, and Confirmation Number. Again, if you find other potential non-primary keys, bring this up on Slack.
@@ -43,12 +45,14 @@ o    Customer Emailed - emails should have a character length of at least 7 or m
  
 
 Other
+
 •    Create indexes on all foreign keys that are not also part of a primary key. Since primary keys are indexed we won’t index a column that is both a PK and FK. Also, index at least 2 other fields in the schema to show you can properly discern which columns should have indexes per design rules discussed in class
 •    Create sequences that auto-increment the payment_id, reservation_id, room_id, location_id, and feature_id by 1 starting at 1. Create a sequence for customer_id that increments by 1 starting at 100001.
 
  
 
 Format 
+
 •    Easy to Read Code: All your code should be well spaced and indented. If it’s not easy to read and messy, you could lose points.
 •    Sections: You must create your script with the three following sections: 
 
@@ -63,6 +67,7 @@ o    Create Index section – After you seed data, add in indexes for the databa
  
 
 Data Requirements
+
 Seed your tables based on the following requirement: NOTE: Include commits after each group of inserts for a particular table and don’t forget to regularly commit to avoid taxing the server and causing NOWAIT error.
 •    Create the 3 locations mentioned in HW1 and make-up details on address, phone, and URL.
 •    Create up to 3 features that can be shared or unique to the locations but make sure at least one location has multiple features assigned to it
@@ -74,11 +79,13 @@ Seed your tables based on the following requirement: NOTE: Include commits after
  
 
 Testing before you turn in your work
+
 •    Make sure your script runs without errors before you submit it. Test it by dropping all the tables and running the script. Then run the script to ensure no unexpected errors occur.
 
  
 
 Deliverable (What to turn in: two files)
+
 •    Turn in your DDL script in a (.sql) file format. If you have issues doing this, at least save it as a .txt file. Do not submit in any other format other than .sql and .txt.
 
 •    Write an executive summary (one page) to explain the code, any assumptions your team made to deliver the SQL code to the customer. Save it as a .pdf or .docx file and submit along with the code.
