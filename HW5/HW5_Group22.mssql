@@ -1,0 +1,232 @@
+--1. Do all tasks below.
+--
+--(a) Write a script that uses an anonymous block of PL/SQL code to declare a variable called count_reservations and set it to the count of all reservations placed by the 
+--customer whose ID is 100002. If the count is greater than 15, then the block should display a message that says, “The customer has placed more than 15 reservations.” Otherwise,
+--the block output should say “The customer has placed 15 or fewer reservations.” Make sure that you set the server output to be on before the PL/SQL block of code and include that
+--at the top of your submission.
+--(b) Delete the record that has reservation ID = 318 from the reservation_details and reservation tables. Do NOT commit.
+--(c) Run your PL/SQL again. You should get a different output.
+--(d) Rollback your deletion.
+
+
+--Q1. a
+
+SET SERVEROUTPUT ON;
+
+
+
+-- Begin an anonymous PL/SQL block
+DECLARE
+  count_reservations NUMBER;
+BEGIN
+    SELECT COUNT(RESERVATION_ID)
+    INTO count_reservations
+    FROM RESERVATION
+    WHERE CUSTOMER_ID=100002;
+
+  IF count_reservations > 15 THEN
+    DBMS_OUTPUT.PUT_LINE('The customer has placed more than 15 reservations.');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('The customer has placed 15 or fewer reservations.');
+  END IF;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occured in the script');
+END;
+/
+
+--Q1. b 
+DELETE FROM reservation_details WHERE RESERVATION_ID=318;
+DELETE FROM RESERVATION WHERE RESERVATION_ID=318;
+
+--Q1. c 
+-- Begin an anonymous PL/SQL block
+DECLARE
+  count_reservations NUMBER;
+BEGIN
+    SELECT COUNT(RESERVATION_ID)
+    INTO count_reservations
+    FROM RESERVATION
+    WHERE CUSTOMER_ID=100002;
+
+  IF count_reservations > 15 THEN
+    DBMS_OUTPUT.PUT_LINE('The customer has placed more than 15 reservations.');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('The customer has placed 15 or fewer reservations.');
+  END IF;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occured in the script');
+END;
+/
+
+ROLLBACK;
+--
+--2. Run the “set define on;” command to allow substitution variables.  Update the previous statement but this time prompt the user to enter a customer ID and dynamically use that input to pull the count of 
+--reservations for the customer ID the user entered.  
+--Also update the output as well to include the customer ID and the count of reservations like so:
+--e.g. When you prompt the user and they enter 100002, it should return something like “The customers with customer ID: 100002, has placed more than 15 reservations.” If you enter a customer ID = 100003, 
+--it should say something like “The customers with customer ID: 100003, has placed 15 or fewer reservations.”. Hint: you’ll need to adjust the SELECT to pull in customer ID with the count which will create a 
+--new to aggregate (i.e. group) data.
+
+
+SET DEFINE ON;
+--Q2
+DECLARE
+  customer_id_val NUMBER;
+  count_reservations NUMBER;
+BEGIN
+    customer_id_val := &customer_id;
+    SELECT COUNT(RESERVATION_ID)
+    INTO count_reservations
+    FROM RESERVATION
+    WHERE CUSTOMER_ID=customer_id_val;
+
+  IF count_reservations > 15 THEN
+    DBMS_OUTPUT.PUT_LINE('The customer with custome ID : ' || customer_id_val || ' has placed more than 15 reservations.');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('The customer with custome ID : ' || customer_id_val || ' has placed 15 or fewer reservations.');
+  END IF;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An error occured in the script');
+END;
+/
+--
+--3.    Write a script that uses an anonymous block of PL/SQL code that attempts to insert a new customer into the customer table. Just utilize the customer_id_seq to assign the customer_id. Make up your own data.
+--Only fill in the fields that require a value. Use a column list to complete the insert statement. Also commit after the data has been inserted. If the insert is successful, the PL/SQL code should display this 
+--message:
+--
+--1 row was inserted into the customer table.
+--If the update is unsuccessful, the procedure should display this message:
+--
+--Row was not inserted. Unexpected exception occurred.
+
+--Q3
+BEGIN
+
+    INSERT INTO customer (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,CITY,STATE,ZIP)
+    VALUES(CUSTOMER_ID_SEQ.NEXTVAL , 'Ramya' , 'Raymond' , 'jr_2@gmail.com' , '542-555-5555' , 'address line 1' ,  'Bangalore' , 'KA' , '78751') ; 
+
+    DBMS_OUTPUT.PUT_LINE('1 row was inserted into the customer table');    
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Row was not inserted. Unexpected Exception Occured');
+END;
+/
+COMMIT;
+
+--Q4
+-- a varray with BULK COLLECT and COUNT
+DECLARE
+  TYPE features_table      IS TABLE OF VARCHAR2(40);
+  feat_names          features_table;
+BEGIN
+  SELECT feature_name
+  BULK COLLECT INTO feat_names
+  FROM FEATURES
+  WHERE LOWER(feature_name) LIKE 'p%' 
+  ORDER BY feature_name;
+
+  FOR i IN 1..feat_names.COUNT LOOP
+    DBMS_OUTPUT.PUT_LINE('Hotel Feature ' || i || ': ' || feat_names(i));
+  END LOOP;
+END;
+/
+
+
+--Q5 --BONUS QUESTION DONE AS WELL
+DECLARE
+  CURSOR city_feature_cursor IS
+    SELECT l.location_name as location , l.city as city , f.feature_name as feature_name
+    from location_features_linking lfl
+    join features f on lfl.feature_id = f.feature_id
+    join location l on lfl.location_id = l.location_id
+    ORDER BY l.location_name, l.city, f.feature_name;
+    
+    city_feature_row city_feature_cursor%ROWTYPE;
+    city_val VARCHAR2(100);
+BEGIN  
+ 
+  city_val := '&city' ;
+  
+  FOR city_feature_row IN city_feature_cursor LOOP   
+  
+    IF (LOWER(city_feature_row.city) = LOWER(city_val)) THEN
+     DBMS_OUTPUT.PUT_LINE(city_feature_row.location || ' in ' || city_feature_row.city || ' has feature: ' || city_feature_row.feature_name);
+    END IF; 
+  END LOOP;
+END;
+/
+
+
+--Q6 
+CREATE OR REPLACE PROCEDURE 
+insert_customer
+(
+first_name customer.first_name%TYPE,
+last_name customer.last_name%TYPE,
+email customer.email%TYPE,
+phone customer.phone%TYPE,
+add_lin_1 customer.address_line_1%TYPE,
+city customer.city%TYPE,
+state_val customer.state%TYPE,
+zcode customer.zip%TYPE
+)
+AS
+BEGIN
+    INSERT INTO customer  (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE,ADDRESS_LINE_1,CITY,STATE,ZIP)
+    VALUES(CUSTOMER_ID_SEQ.NEXTVAL , first_name , last_name , email , phone , add_lin_1 , city , state_val , zcode ) ; 
+
+    DBMS_OUTPUT.PUT_LINE('1 row was inserted into the customer table');    
+EXCEPTION
+  WHEN OTHERS THEN
+    ROLLBACK;
+    DBMS_OUTPUT.PUT_LINE('Row was not inserted. Unexpected Exception Occured, ROLLBACK EXECUTED');
+END;
+/
+
+--TEST STATEMENTS 1
+CALL insert_customer ('Joseph', 'Lee', 'jo12@yahoo.com', '773-222-3344', 'Happy street', 'Chicago', 'Il', '60602');
+--TEST STATEMENTS 2
+BEGIN
+Insert_customer ('Mary', 'Lee', 'jo34@yahoo.com', '773-222-3344', 'Happy street', 'Chicago', 'Il', '60602');
+END;
+/
+
+
+--Q7
+
+--NOTE  :  WE CONSIDER ALL ROOMS , and not filter based on STATUS or CURRENT BOOKING. 
+CREATE OR REPLACE FUNCTION hold_count
+(
+customer_id_val NUMBER
+)
+RETURN NUMBER
+AS 
+total_rooms NUMBER;
+BEGIN
+    SELECT count(room_id) as t_r
+    INTO total_rooms
+    FROM reservation r
+    JOIN reservation_details rd ON r.reservation_id = rd.reservation_id
+    WHERE r.customer_id  = customer_id_val
+    GROUP BY r.customer_id;
+
+RETURN total_rooms;    
+    DBMS_OUTPUT.PUT_LINE(total_rooms);
+EXCEPTION
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('ERROR IN CUSTOMER ID');       
+    RETURN -1;
+END;
+/
+
+--Test Function for Q7
+select customer_id, hold_count(customer_id)  
+from reservation
+group by customer_id
+order by customer_id;
