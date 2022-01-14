@@ -1,4 +1,4 @@
-Managerial Case questions: Predicting Consumer Tastes with Big Data at Gap
+**Managerial Case questions: Predicting Consumer Tastes with Big Data at Gap**
 
 Why is GAP doing poorly in 2017? Was Peck correct in firing his creative directors and replacing them with a big-data-driven creative process? Why or why not?
 
