@@ -4,7 +4,6 @@ Assignment Requirements:
 Do your own work
 •    Your team must do your own work and create your own DDL script based on a working (final version) posted below.  
 
-HW2-Starter-ERD.jpeg
 
 Coding Standards
 •    Naming: Use the final ERD as a reference on how to name tables and columns. For constraints, make the names clear and easy to understand. Avoid abbreviations.
@@ -83,6 +82,4 @@ Deliverable (What to turn in: two files)
 
 •    Write an executive summary (one page) to explain the code, any assumptions your team made to deliver the SQL code to the customer. Save it as a .pdf or .docx file and submit along with the code.
 
- 
 
-Submission
