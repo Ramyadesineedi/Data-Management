@@ -3,7 +3,7 @@ Goal: In this assignment, you are tasked with creating a fully functioning DDL s
 Assignment Requirements:
 Do your own work
 •    Your team must do your own work and create your own DDL script based on a working (final version) posted below.  
-![alt text](https://utexas.instructure.com/courses/1318318/files/62105798/preview.png)
+![alt text]()
 
 Coding Standards
 •    Naming: Use the final ERD as a reference on how to name tables and columns. For constraints, make the names clear and easy to understand. Avoid abbreviations.
