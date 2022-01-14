@@ -1,0 +1,136 @@
+--------------------QUESTION 1------------------------------
+
+SELECT COUNT(customer_id) as count_of_customers, MIN(stay_credits_earned) as min_credits, MAX(stay_credits_earned) as max_credits
+FROM customer
+;
+--------------------QUESTION 2------------------------------
+
+SELECT c.customer_id, COUNT(r.reservation_id) as Number_of_Reservations, MIN(r.check_in_date) as earliest_check_in
+FROM customer c JOIN reservation r ON c.customer_id = r.customer_id
+GROUP BY c.customer_id
+ORDER BY Number_of_Reservations DESC
+;
+
+--------------------QUESTION 3------------------------------
+
+SELECT city, state, round(AVG(stay_credits_earned),0) as avg_credits_earned
+FROM customer
+GROUP BY city, state
+ORDER BY state, avg_credits_earned DESC
+;
+
+
+--------------------QUESTION 4------------------------------
+---This query should highlight for each customer if they havve had more than 1 stay in a room or not.
+
+SELECT c.customer_id, c.last_name, rm.room_number, COUNT(r.reservation_id) as stay_count, CASE WHEN COUNT(r.reservation_id) > 1 THEN 'Yes' ELSE 'No' END as longer_stay_flag
+FROM customer c JOIN reservation r ON c.customer_id = r.customer_id JOIN reservation_details rd ON r.reservation_id = rd.reservation_id JOIN room rm ON rd.room_id = rm.room_id
+WHERE r.location_id = 1
+GROUP BY c.customer_id, c.last_name, rm.room_number
+ORDER BY c.customer_id, stay_count DESC
+;
+
+--------------------QUESTION 5------------------------------
+SELECT c.customer_id, c.last_name, rm.room_number, COUNT(r.reservation_id) as stay_count, CASE WHEN COUNT(r.reservation_id) > 1 THEN 'Yes' ELSE 'No' END as longer_stay_flag
+FROM customer c JOIN reservation r ON c.customer_id = r.customer_id JOIN reservation_details rd ON r.reservation_id = rd.reservation_id JOIN room rm ON rd.room_id = rm.room_id
+WHERE (r.location_id = 1 AND r.status = 'C')
+GROUP BY c.customer_id, c.last_name, rm.room_number
+HAVING COUNT(r.reservation_id) > 2  
+ORDER BY c.customer_id, stay_count DESC
+;
+
+--------------------QUESTION 6------------------------------
+--Part A
+SELECT l.location_name, r.check_in_date, SUM(number_of_guests) as total_guests
+FROM reservation r JOIN location l ON l.location_id = r.location_id
+WHERE r.check_in_date > TRUNC(sysdate)
+GROUP BY ROLLUP (l.location_name,r.check_in_date)
+;
+
+--Part B
+--There is only one major difference between the functionality of the ROLLUP operator and the CUBE operator. 
+--ROLLUP operator generates aggregated results for the selected columns in a hierarchical way. 
+--On the other hand, CUBE generates a aggregated result that contains all the possible combinations for the selected columns.
+--Hence, one should use ROLLUP if they want their data aggregated hierarchically and CUBE for all possible combinations.
+
+
+
+--------------------QUESTION 7------------------------------
+SELECT f.feature_name, COUNT(l.location_id) as count_of_locations
+FROM location l JOIN location_features_linking lf ON l.location_id = lf.location_id JOIN features f ON f.feature_id = lf.feature_id
+GROUP BY f.feature_name
+HAVING COUNT(l.location_id) > 2  
+;
+
+
+
+
+
+
+--------------------SUBQUERY QUESTIONS --------------------
+
+
+
+--------------------QUESTION 8------------------------------
+SELECT DISTINCT customer_id, first_name, last_name, email
+FROM customer  
+WHERE customer_id NOT IN (SELECT customer_id FROM reservation);
+
+
+--------------------QUESTION 9------------------------------
+
+SELECT first_name, last_name, email, phone, stay_credits_earned
+FROM customer
+WHERE stay_credits_earned > (SELECT AVG(stay_credits_earned) FROM customer)
+ORDER BY stay_credits_earned DESC;
+
+
+--------------------QUESTION 10------------------------------
+
+-- Intiial Query to be used in below sub query--
+SELECT city,state, SUM(stay_credits_earned) as total_earned, SUM(stay_credits_used) as total_used
+FROM customer
+GROUP BY city,state
+order by state, city
+;
+
+--Part B
+SELECT city,state, (total_earned - total_used) as credits_remaining
+FROM
+    (
+        SELECT city,state, SUM(stay_credits_earned) as total_earned, SUM(stay_credits_used) as total_used
+        FROM customer
+        GROUP BY city,state
+        order by state, city
+    )
+ORDER BY credits_remaining DESC
+;
+
+
+
+--------------------QUESTION 11------------------------------
+SELECT confirmation_nbr, date_created, check_in_date, status, rm.room_id
+FROM reservation r JOIN reservation_details rd ON r.reservation_id = rd.reservation_id JOIN room rm ON rd.room_id = rm.room_id
+WHERE rm.room_id IN 
+    (   SELECT room_id
+        FROM reservation_details 
+        GROUP BY room_id
+        HAVING COUNT(room_id) < 5
+    )
+    
+    AND r.status <> 'C'
+;
+
+--------------------QUESTION 12------------------------------
+SELECT a.customer_id, cardholder_first_name, cardholder_last_name, card_number, expiration_date, cc_id
+FROM customer_payment cp
+JOIN (  SELECT customer_id, COUNT(reservation_id) as reservation_count
+        FROM reservation
+        WHERE status = 'C'
+        GROUP BY customer_id
+        HAVING COUNT(reservation_id) = 1
+      ) a 
+    ON cp.customer_id = a.customer_id
+WHERE cp.card_type = 'MSTR';
+
+
